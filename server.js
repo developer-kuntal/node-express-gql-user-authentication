@@ -3,7 +3,7 @@ const cors = require("cors")
 const dotenv = require("dotenv")
 const { graphqlHTTP } = require("express-graphql")
 const schema = require("./graphql/schema")
-
+// const { user } = require("./graphql/queries")
 const { connectDB } = require("./db")
 const app = express()
 dotenv.config()
@@ -21,8 +21,17 @@ app.get("/", (req, res) => {
 app.use(
   "/graphql",
   graphqlHTTP({
+    // context: ({request}) => {
+    //   const user = user(request.headers['auth'])
+    //   if (user == null) {
+    //     throw new Error('Invalid User')
+    //   }
+    //   console.log("UCAuthH: ",request.headers['auth']);
+    //   return {user};
+    // },
     schema,
     graphiql: true,
+    debug: false
   })
 )
 

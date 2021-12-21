@@ -1,9 +1,10 @@
 const { PostType, CommentType } = require("./types")
 
 const { User, Post, Comment } = require("../models")
-const { GraphQLString } = require("graphql")
+const { GraphQLString, GraphQLError } = require("graphql")
 
 const { createJwtToken } = require("../util/auth")
+const res = require("express/lib/response")
 
 const register = {
   type: GraphQLString,
@@ -16,11 +17,18 @@ const register = {
   },
   async resolve(parent, args) {
     const { name, email, password, displayName } = args
-    const user = new User({ name, email, password, displayName })
-
-    await user.save()
-    const token = createJwtToken(user)
-    return token
+    // if()
+    const user = await User.findOne({'email': email})
+    // console.log("RT: ",user)
+    if( user == null ) {
+      user = new User({ name, email, password, displayName })
+      await user.save()
+      const token = createJwtToken(user)
+      return token
+    } else {
+      // res.sendStatus(400);
+      throw new GraphQLError("User Already Exsist")
+    }
   },
 }
 
@@ -33,7 +41,7 @@ const login = {
   },
   async resolve(parent, args) {
     const user = await User.findOne({ email: args.email }).select("+password")
-    console.log(user)
+    // console.log(user)
     if (!user || args.password !== user.password) {
       throw new Error("Invalid credentials")
     }

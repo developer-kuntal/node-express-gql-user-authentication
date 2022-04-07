@@ -2,7 +2,14 @@
 const { GraphQLSchema, GraphQLObjectType } = require("graphql")
 
 // Import queries
-const { users, user, posts, post, comments, comment } = require("./queries")
+const { 
+  users, 
+  user, 
+  posts, 
+  post, 
+  comments, 
+  comment 
+} = require("./queries")
 
 // Import mutations
 const {
@@ -15,6 +22,11 @@ const {
   updateComment,
   deleteComment,
 } = require("./mutations")
+
+// Import Subscription
+const {
+  newPostSubscription
+} = require('./subscriptions')
 
 // Define QueryType
 const QueryType = new GraphQLObjectType({
@@ -39,7 +51,17 @@ const MutationType = new GraphQLObjectType({
   },
 })
 
+// Define SubscriptionType
+const SubscriptionType = new GraphQLObjectType({
+  name: "SubscriptionType",
+  description: "Subscriptions",
+  fields: {
+    newPostSubscription,
+  },
+})
+
 module.exports = new GraphQLSchema({
   query: QueryType,
   mutation: MutationType,
+  subscription: SubscriptionType
 })

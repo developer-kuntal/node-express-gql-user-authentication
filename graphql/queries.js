@@ -2,8 +2,6 @@ const { GraphQLList, GraphQLID } = require("graphql")
 const { UserType, PostType, CommentType } = require("./types")
 const { User, Comment, Post } = require("../models")
 
-const bcrypt = require("bcryptjs")
-
 const users = {
   type: new GraphQLList(UserType),
   description: "Retrieves list of users",
@@ -38,6 +36,7 @@ const post = {
     return Post.findById(args.id)
   },
 }
+
 const comments = {
   type: new GraphQLList(CommentType),
   description: "Retrieves list of comments",

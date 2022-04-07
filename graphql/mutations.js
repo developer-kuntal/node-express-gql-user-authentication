@@ -1,10 +1,9 @@
 const { PostType, CommentType } = require("./types")
-
 const { User, Post, Comment } = require("../models")
 const { GraphQLString, GraphQLError } = require("graphql")
-
 const { createJwtToken } = require("../util/auth")
-const res = require("express/lib/response")
+const { PubSub } = require('graphql-subscriptions')
+const pubsub = new PubSub()
 
 const register = {
   type: GraphQLString,
@@ -13,17 +12,17 @@ const register = {
     name: { type: GraphQLString },
     email: { type: GraphQLString },
     password: { type: GraphQLString },
-    displayName: { type: GraphQLString },
+    // displayName: { type: GraphQLString },
   },
   async resolve(parent, args) {
-    const { name, email, password, displayName } = args
+    const { name, email, password } = args
     // if()
     const user = await User.findOne({'email': email})
     // console.log("RT: ",user)
     if( user == null ) {
-      user = new User({ name, email, password, displayName })
-      await user.save()
-      const token = createJwtToken(user)
+      const new_user = new User({ name, email, password })
+      await new_user.save()
+      const token = createJwtToken(new_user)
       return token
     } else {
       // res.sendStatus(400);
@@ -58,7 +57,7 @@ const addPost = {
     title: { type: GraphQLString },
     body: { type: GraphQLString },
   },
-  resolve(parent, args, { verifiedUser }) {
+  resolve(parent, args, { verifiedUser }, info) {
     console.log("Verified User: ", verifiedUser)
     if (!verifiedUser) {
       throw new Error("Unauthorized")
@@ -69,6 +68,9 @@ const addPost = {
       title: args.title,
       body: args.body,
     })
+
+    // Subscription
+    pubsub.publish('newPostSubscription', { data: post })
 
     return post.save()
   },
